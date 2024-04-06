@@ -1,0 +1,14 @@
+server:
+  jetty:
+    threads:
+      acceptors: 4
+      selectors: 8
+  port: 9090
+  servlet:
+    context-path: /emos-workflow
+
+spring:
+  application:
+    name: emos-workflow
+  profiles:
+    active: dev

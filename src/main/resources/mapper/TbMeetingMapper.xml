@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.workflow.db.dao.TbMeetingMapper">
+
+    <resultMap id="BaseResultMap" type="com.example.workflow.db.pojo.TbMeeting">
+            <id property="id" column="id" jdbcType="BIGINT"/>
+            <result property="uuid" column="uuid" jdbcType="VARCHAR"/>
+            <result property="title" column="title" jdbcType="VARCHAR"/>
+            <result property="creatorId" column="creator_id" jdbcType="BIGINT"/>
+            <result property="date" column="date" jdbcType="DATE"/>
+            <result property="place" column="place" jdbcType="VARCHAR"/>
+            <result property="start" column="start" jdbcType="TIME"/>
+            <result property="end" column="end" jdbcType="TIME"/>
+            <result property="type" column="type" jdbcType="SMALLINT"/>
+            <result property="members" column="members" jdbcType="OTHER"/>
+            <result property="desc" column="desc" jdbcType="VARCHAR"/>
+            <result property="instanceId" column="instance_id" jdbcType="VARCHAR"/>
+            <result property="present" column="present" jdbcType="OTHER"/>
+            <result property="unpresent" column="unpresent" jdbcType="OTHER"/>
+            <result property="status" column="status" jdbcType="SMALLINT"/>
+            <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id,uuid,title,
+        creator_id,date,place,
+        start,end,type,
+        members,desc,instance_id,
+        present,unpresent,status,
+        create_time
+    </sql>
+    <select id="searchMeetingByInstanceId" parameterType="string" resultType="hashmap">
+        SELECT
+            m.id,
+            m.uuid,
+            u.name,
+            u.photo,
+            m.`desc`,
+            m.place,
+            m.type,
+            m.date,
+            DATE_FORMAT(m.start, '%H:%i') AS start,
+            DATE_FORMAT(m.end, '%H:%i') AS end,
+            (
+                SELECT GROUP_CONCAT(u.name) FROM tb_user u
+                WHERE u.status = 1 AND JSON_CONTAINS(m.members, CAST(u.id AS CHAR))
+            ) AS members
+        FROM tb_meeting m
+                 JOIN tb_user u ON m.creator_id = u.id
+        WHERE instance_id = #{instanceId}
+    </select>
+</mapper>
